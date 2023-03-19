@@ -6,6 +6,14 @@ import time
 zh_tw_data = {}
 en_us_data = {}
 
+class SingleQuoted(str):
+    pass
+
+def single_quoted_presenter(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style="'")
+
+yaml.add_representer(SingleQuoted, single_quoted_presenter)
+
 while True:
     lang = input("請選擇語言\nPlease select a language\n(1) zh_tw\n(2) en_us\n>>> ")
 
@@ -29,15 +37,15 @@ while True:
                 print("請輸入正確的選項")
 
         #輸入&輸出
-        if user_input.lower() in ["1", "怪物", "m", "mobs"]:
+        if user_input.lower() in ["1", "m", "mobs"]:
             monster_name = input("請輸入怪物ID\n>>> ")
-            display_name = input("請輸入物品顯示名稱\n可以輸入16進制色碼或是顏色代號\n例如: <#FF00FF>物品測試 or &d物品測試\n>>> ")
+            display_name = input("請輸入怪物顯示名稱\n可以輸入16進制色碼或是顏色代號\n例如: <#FF00FF>怪物測試 or &d怪物測試\n>>> ")
             monster_type = input("請輸入怪物類型\n例如: ZOMBIE(殭屍)\n>>> ")
-            monster_health = input("請輸入怪物生命值\n\n>>> ")
+            monster_health = input("請輸入怪物生命值\n>>> ")
             monster_damage = input("請輸入怪物攻擊力\n>>> ")
             if display_name != "-":
-                display_name = zhconv.convert(display_name, 'zh-tw')
-            zh_tw_data[int(monster_name)] = {"Type": int(zhconv.convert(monster_type, 'zh-tw')), 
+                display_name = SingleQuoted(display_name)
+            zh_tw_data[str(monster_name)] = {"Type": str(zhconv.convert(monster_type, 'zh-tw')), 
                                 "Display": display_name, 
                                 "Health": int(zhconv.convert(monster_health, 'zh-tw')), 
                                 "Damage": int(zhconv.convert(monster_damage, 'zh-tw'))}
@@ -49,38 +57,27 @@ while True:
             item_health = input("請輸入物品生命值\n>>> ")
             item_damage = input("請輸入物品攻擊力\n>>> ")
             if display_name != "-":
-                display_name = zhconv.convert(display_name, 'zh-tw')
-            zh_tw_data[int(item_name)] = {"Type": int(zhconv.convert(item_type, 'zh-tw')), 
+                display_name = SingleQuoted(display_name)
+            zh_tw_data[str(item_name)] = {"Type": str(zhconv.convert(item_type, 'zh-tw')), 
                             "Display": display_name, 
                             "Model": int(zhconv.convert(model_value, 'zh-tw')), 
                             "Health": int(zhconv.convert(item_health, 'zh-tw')), 
                             "Damage": int(zhconv.convert(item_damage, 'zh-tw'))}
 
-        # 修改 Display
-        new_data = {}
-        for k, v in zh_tw_data.items():
-            new_v = {}
-            for kk, vv in v.items():
-                if kk == "Display":
-                    new_v[kk] = vv
-                else:
-                    new_v[kk] = int(vv)
-            new_data[k] = new_v
-
         #最確認並打包成yml檔進行輸出
         while True:
-            output = yaml.dump(new_data, allow_unicode=True)
+            output = yaml.dump(zh_tw_data, allow_unicode=True)
             Confirmation = input("——————————\n" + output + "——————————\n確認以上資料確認是否要輸出檔案\n輸入(y)將會進行下一步\n輸入(n)將會自動刪除紀錄並停止程序\n>>> ")
             if Confirmation.lower() == "y":
                 file_name = input("請輸入檔案名稱：\n不須輸入副檔名(.yml)\n>>> ")
                 with open(f"{file_name}.yml", "w", encoding="utf-8") as f:
-                    yaml.dump(new_data, f, allow_unicode=True)
+                    yaml.dump(zh_tw_data, f, allow_unicode=True)
                 sys.exit()
 
             elif Confirmation.lower() == "n":
                 print("即將關閉程式")
                 time.sleep(3)
-                break
+                sys.exit()
 
             else:
                 print("請輸入y或是n")
@@ -111,7 +108,7 @@ while True:
             monster_health = input("請輸入怪物生命值\n\n>>> ")
             monster_damage = input("請輸入怪物攻擊力\n>>> ")
             if display_name != "-":
-                display_name = zhconv.convert(display_name, 'zh-tw')
+                display_name = SingleQuoted(display_name)
             en_us_data[int(monster_name)] = {"Type": int(zhconv.convert(monster_type, 'zh-tw')), 
                                 "Display": display_name, 
                                 "Health": int(zhconv.convert(monster_health, 'zh-tw')), 
@@ -124,7 +121,7 @@ while True:
             item_health = input("請輸入物品生命值\n>>> ")
             item_damage = input("請輸入物品攻擊力\n>>> ")
             if display_name != "-":
-                display_name = zhconv.convert(display_name, 'zh-tw')
+                display_name = SingleQuoted(display_name)
             en_us_data[int(item_name)] = {"Type": int(zhconv.convert(item_type, 'zh-tw')), 
                             "Display": display_name, 
                             "Model": int(zhconv.convert(model_value, 'zh-tw')), 
@@ -132,7 +129,7 @@ while True:
                             "Damage": int(zhconv.convert(item_damage, 'zh-tw'))}
 
         # 修改 Display
-        new_data = {}
+        en_us_new_data = {}
         for k, v in en_us_data.items():
             new_v = {}
             for kk, vv in v.items():
@@ -140,16 +137,16 @@ while True:
                     new_v[kk] = vv
                 else:
                     new_v[kk] = int(vv)
-            new_data[k] = new_v
+            en_us_new_data[k] = new_v
 
         #最確認並打包成yml檔進行輸出
         while True:
-            output = yaml.dump(new_data, allow_unicode=True)
+            output = yaml.dump(en_us_new_data, allow_unicode=True)
             Confirmation = input("——————————\n" + output + "——————————\nCheck the above information to confirm if you want to export the file\nEnter (y) will proceed to the next step\nEnter(n) will automatically delete the record and stop the program\n>>> ")
             if Confirmation.lower() == "y":
                 file_name = input("Please enter the file name：\nNo need to enter a secondary file name(.yml)\n>>> ")
                 with open(f"{file_name}.yml", "w", encoding="utf-8") as f:
-                    yaml.dump(new_data, f, allow_unicode=True)
+                    yaml.dump(en_us_new_data, f, allow_unicode=True)
                 sys.exit()
 
             elif Confirmation.lower() == "n":
