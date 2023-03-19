@@ -15,7 +15,7 @@ def single_quoted_presenter(dumper, data):
 yaml.add_representer(SingleQuoted, single_quoted_presenter)
 
 while True:
-    lang = input("請選擇語言\nPlease select a language\n(1) zh_tw\n(2) en_us\n>>> ")
+    lang = input("請選擇語言\nPlease select a language\n(1) zh_tw(繁體中文)\n(2) en_us(美式英語)\n>>> ")
 
     #中文系統
     if lang == "1":
@@ -37,12 +37,13 @@ while True:
                 print("請輸入正確的選項")
 
         #輸入&輸出
-        if user_input.lower() in ["1", "m", "mobs"]:
+        if user_input.lower() in ["1", "怪物", "m", "mobs"]:
+            input("使用說明(格式):\n\n怪物ID:\n  Display: '怪物顯示名稱'\n  Type: 怪物類型\n  Health: 怪物生命值\n  Damage:  怪物攻擊力\n\n(最終檔案格式會依照英文字母順序自動排列)\n\n按Enter鍵繼續...")
             monster_name = input("請輸入怪物ID\n>>> ")
             display_name = input("請輸入怪物顯示名稱\n可以輸入16進制色碼或是顏色代號\n例如: <#FF00FF>怪物測試 or &d怪物測試\n>>> ")
             monster_type = input("請輸入怪物類型\n例如: ZOMBIE(殭屍)\n>>> ")
-            monster_health = input("請輸入怪物生命值\n>>> ")
-            monster_damage = input("請輸入怪物攻擊力\n>>> ")
+            monster_health = input("請輸入怪物生命值\n請輸入數字\n>>> ")
+            monster_damage = input("請輸入怪物攻擊力\n請輸入數字\n>>> ")
             if display_name != "-":
                 display_name = SingleQuoted(display_name)
             zh_tw_data[str(monster_name)] = {"Type": str(zhconv.convert(monster_type, 'zh-tw')), 
@@ -72,7 +73,24 @@ while True:
                 file_name = input("請輸入檔案名稱：\n不須輸入副檔名(.yml)\n>>> ")
                 with open(f"{file_name}.yml", "w", encoding="utf-8") as f:
                     yaml.dump(zh_tw_data, f, allow_unicode=True)
-                sys.exit()
+                
+                while True:
+                    usage = input("檔案已成功生成! " + file_name + "\n若需要查閱使用方式請輸入(y)\n若不需要查閱請輸入(n)\n>>> ")
+                    if usage.lower() == "y" and user_input.lower() in ["1", "怪物", "m", "mobs"]:
+                        print("使用方式:\n\n請將生成出來的檔案放進'Plugins/MythicMobs/Mobs'\n在控制台輸入'/mm reload'\n進入遊戲後輸入'/mm egg get " + monster_name + "'\n即可獲取你所製作的怪物蛋\n")
+                        input("點擊Entar鍵關閉視窗...")
+                        sys.exit()
+
+                    elif usage.lower() == "y" and user_input.lower() in ["2", "物品","i", "items"]:
+                        print("使用方式:\n\n請將生成出來的檔案放進'Plugins/MythicMobs/Items'\n在控制台輸入'/mm reload'\n進入遊戲後輸入'/mm item get " + monster_name + "'\n即可獲取你所製作的物品\n")
+                        input("點擊Entar鍵關閉視窗...")
+                        sys.exit()
+
+                    elif usage.lower() == "n":
+                        sys.exit()
+
+                    else:
+                        print("請輸入y或是n")
 
             elif Confirmation.lower() == "n":
                 print("即將關閉程式")
